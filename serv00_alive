@@ -1,29 +1,52 @@
 #!/bin/bash
 
-# 默认配置
+# 默认配置 | Default configuration
 DEFAULT_SERVERS_FILE="$HOME/.serv00_alive_servers"
+## 当前语言 | Current language
+CURRENT_LANG=0 ### 0: en-US, 1: zh-Hans-CN
+VERSION="0.1.0"
 
-# 显示帮助信息
+# 本地化 | Localization
+recho() {
+  if [ "$CURRENT_LANG" == "1" ]; then
+    ## zh-Hans-CN
+    echo -e "$1";
+  else
+    ## en-US
+    echo -e "$2";
+  fi
+}
+
+# 显示版本信息 | Show version
+show_version() {
+  recho "serv00 保活 v$VERSION" "serv00 alive v$VERSION"
+}
+
+# 语言检测 | Language detection
+if [ $(echo ${LANG/_/-} | grep -Ei "\\b(zh|cn)\\b") ]; then CURRENT_LANG=1; fi
+
+# 显示帮助信息 | Show help information
 show_help() {
-  echo "用法: serv00_alive [选项]"
+  recho "用法: serv00_alive [选项]" "Usage: serv00_alive [options]"
   echo
-  echo "选项:"
-  echo "  -h, --help     显示此帮助信息"
+  recho "选项：" "Options:"
+  recho "  -h, --help     显示此帮助信息" "  -h, --help     Show this help information"
+  recho "  -v, --version  显示版本信息" "  -v, --version  Show version information"
   echo "  -f, --file FILE"
-  echo "                 指定包含服务器列表的文件（默认: $DEFAULT_SERVERS_FILE）"
+  recho "                 指定包含服务器列表的文件（默认: $DEFAULT_SERVERS_FILE）" "                 Specify the file containing the server list (default: $DEFAULT_SERVERS_FILE)"
   echo
-  echo "服务器文件格式:"
-  echo "  每行一个服务器，格式为 username@hostname:password"
-  echo " 例如:"
+  recho "服务器文件格式：" "Server file format:"
+  recho "  每行一个服务器，格式为 username@hostname:password" "  One server per line, in the format username@hostname:password"
+  recho "  例如：" "  For example:"
   echo "    user1@sX.serv00.com:password1"
   echo "    user2@sX.serv00.com:password2"
   echo
-  echo "注意:"
-  echo " - 需要安装 sshpass 工具"
-  echo "  - 请确保服务器文件权限设置正确以保护密码安全"
+  recho "注意：" "Note:"
+  recho "  - 需要安装 sshpass 工具" "  - sshpass tool needs to be installed"
+  recho "  - 请确保服务器文件权限设置正确以保护密码安全" "  - Ensure server file permissions are set correctly to protect password security"
 }
 
-# 解析命令行参数
+# 解析命令行参数 | Parse command line arguments
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case $1 in
@@ -31,12 +54,16 @@ parse_args() {
         show_help
         exit 0
         ;;
+      -v|--version)
+        show_version
+        exit 0
+        ;;
       -f|--file)
         SERVERS_FILE="$2"
         shift 2
         ;;
       *)
-        echo "未知选项: $1"
+        recho "未知选项: $1" "Unknown option: $1"
         show_help
         exit 1
         ;;
@@ -44,74 +71,74 @@ parse_args() {
   done
 }
 
-# 读取服务器列表
+# 读取服务器列表 | Read server list
 read_servers() {
   local file="$1"
   if [[ ! -f "$file" ]]; then
-    echo "错误: 服务器文件 '$file' 不存在"
+    recho "错误: 服务器文件 '$file' 不存在" "Error: Server file '$file' does not exist"
     exit 1
   fi
   
-  # 读取服务器列表到数组
+  # 读取服务器列表到数组 | Read server list into array
   mapfile -t servers < "$file"
   
-  # 检查是否有服务器
+  # 检查是否有服务器 | Check if there are servers
   if [[ ${#servers[@]} -eq 0 ]]; then
-    echo "错误: 服务器文件 '$file' 中没有服务器"
+    recho "错误: 服务器文件 '$file' 中没有服务器" "Error: No servers in server file '$file'"
     exit 1
   fi
 }
 
-# 保活单个服务器连接
+# 保活单个服务器连接 | Keep alive single server connection
 keep_alive() {
   local server_entry="$1"
   
-  # 分离用户名、主机名和密码
-  local user_and_host="${server_entry%:*}"
-  local password="${server_entry#*:}"
-  local user="${user_and_host%@*}"
-  local server="${user_and_host#*@}"
+  # 分离用户名、主机名和密码 | Separate username, hostname and password
+  local user=$(echo "$server_entry" | cut -d'@' -f1)
+  local host_and_password=$(echo "$server_entry" | cut -d'@' -f2-)
+  local server=$(echo "$host_and_password" | cut -d':' -f1)
+  local password=$(echo "$host_and_password" | cut -d':' -f2-)
   
-  # 执行SSH连接测试
-  echo "正在测试连接到 $user@$server..."
+  # 执行SSH连接测试 | Execute SSH connection test
+  recho "正在测试连接到 $user@$server..." "Testing connection to $user@$server..."
   timeout 30 sshpass -p "$password" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -tt "$user@$server" "echo \"Hello from $user\"; date; sleep 3"
   local result=$?
   
-  # 处理结果
+  # 处理结果 | Handle results
   if [ $result -eq 124 ]; then
-    echo "错误：$user@$server 连接超时"
-    # 这里可以添加发送通知的代码
-    # message="Serv00 保活 SSH 连接超时！"
+    recho "错误：$user@$server 连接超时" "Error: $user@$server connection timed out"
+    # 这里可以添加发送通知的代码 | Code to send notifications can be added here
+    # message="Serv00 保活 SSH 连接超时！" | message="Serv00 alive SSH connection timed out!"
   elif [ $result -ne 0 ]; then
-    echo "错误：$user@$server 连接失败"
-    # message="Serv00 保活 SSH 连接失败！"
+    recho "错误：$user@$server 连接失败" "Error: $user@$server connection failed"
+    # message="Serv00 保活 SSH 连接失败！" | message="Serv00 alive SSH connection failed!"
   else
-    echo "$user@$server 连接成功！"
-    # message="Serv00 保活 SSH 连接成功！"
+    recho "$user@$server 连接成功！" "$user@$server connection successful!"
+    # message="Serv00 保活 SSH 连接成功！" | message="Serv00 alive SSH connection successful!"
   fi
   
   echo "----------------------------------------"
 }
 
-# 主函数
+# 主函数 | Main function
 main() {
-  # 默认值
+  # 默认值 | Default values
   SERVERS_FILE="${DEFAULT_SERVERS_FILE}"
   
-  # 解析命令行参数
+  # 解析命令行参数 | Parse command line arguments
   parse_args "$@"
   
-  # 读取服务器列表
+  # 读取服务器列表 | Read server list
   read_servers "$SERVERS_FILE"
   
-  # 对每个服务器执行保活操作
+  # 对每个服务器执行保活操作 | Perform keep alive operation on each server
   for server in "${servers[@]}"; do
-    # 跳过空行和注释行
+    # 跳过空行和注释行 | Skip empty lines and comment lines
     if [[ -n "$server" ]] && [[ ! "$server" =~ ^[[:space:]]*# ]]; then
       keep_alive "$server"
     fi
   done
 }
 
-# 执行主函数
+# 执行主函数 | Execute main function
 main "$@"
