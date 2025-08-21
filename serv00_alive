@@ -4,7 +4,7 @@
 DEFAULT_SERVERS_FILE="$HOME/.serv00_alive_servers"
 ## 当前语言 | Current language
 CURRENT_LANG=0 ### 0: en-US, 1: zh-Hans-CN
-VERSION="0.2.0"
+VERSION="0.3.0"
 
 # 颜色定义 | Color definitions
 RED='\033[0;31m'
@@ -107,7 +107,7 @@ keep_alive() {
   local password=$(echo "$host_and_password" | cut -d':' -f2-)
   
   # 执行SSH连接测试 | Execute SSH connection test
-  recho "${BLUE}正在测试连接到 $user@$server...${NC}" "${BLUE}Testing connection to $user@$server...${NC}"
+  recho "${BLUE}正在测试连接到 $user@$server……${NC}" "${BLUE}Testing connection to $user@$server...${NC}"
   timeout 30 sshpass -p "$password" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -tt "$user@$server" "echo \"Hello from $user\"; date; sleep 3"
   local result=$?
   
