@@ -31,6 +31,13 @@ user2@s2.serv00.com:password2
 
 ```bash
 pm2 start bash --name serv00_alive -- -c "curl -sS https://raw.githubusercontent.com/PJ-568/serv00_alive/refs/heads/master/serv00_alive_runner | bash"
+pm2 save
+```
+
+View logs (very nice):
+
+```bash
+pm2 log serv00_alive
 ```
 
 #### Run directly
@@ -65,6 +72,12 @@ chmod +x serv00_alive
 
 - `serv00_alive`: The main script, responsible for reading the server list and performing SSH connection tests.
 - `serv00_alive_runner`: The runner script, responsible for periodically executing the main script. It fetches the latest version of the `serv00_alive` script from GitHub and executes it.
+
+## Appendix
+
+Install pm2: `bash <(curl -s https://raw.githubusercontent.com/k0baya/alist_repl/main/serv00/install-pm2.sh)`
+
+[Node.js elegant keep alive](https://forum.naixi.net/thread-2797-1-1.html)
 
 ## License
 

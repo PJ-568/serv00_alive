@@ -1,4 +1,4 @@
-# serv00 保活 脚本
+# serv00 保号脚本
 
 > 简体中文 | [ENGLISH](README.en.md)
 
@@ -31,6 +31,13 @@ user2@s2.serv00.com:password2
 
 ```bash
 pm2 start bash --name serv00_alive -- -c "curl -sS https://raw.githubusercontent.com/PJ-568/serv00_alive/refs/heads/master/serv00_alive_runner | bash"
+pm2 save
+```
+
+看 log（很好看的）：
+
+```bash
+pm2 log serv00_alive
 ```
 
 #### 直接运行

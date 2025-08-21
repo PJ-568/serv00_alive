@@ -4,7 +4,7 @@
 DEFAULT_SERVERS_FILE="$HOME/.serv00_alive_servers"
 ## 当前语言 | Current language
 CURRENT_LANG=0 ### 0: en-US, 1: zh-Hans-CN
-VERSION="0.3.0"
+VERSION="0.3.1"
 
 # 颜色定义 | Color definitions
 RED='\033[0;31m'
@@ -26,7 +26,7 @@ recho() {
 
 # 显示版本信息 | Show version
 show_version() {
-  recho "${GREEN}serv00 保活 v$VERSION${NC}" "${GREEN}serv00 alive v$VERSION${NC}"
+  recho "${GREEN}serv00 保号 v$VERSION${NC}" "${GREEN}serv00 alive v$VERSION${NC}"
 }
 
 # 语言检测 | Language detection
@@ -96,7 +96,7 @@ read_servers() {
   fi
 }
 
-# 保活单个服务器连接 | Keep alive single server connection
+# 保号单个服务器连接 | Keep alive single server connection
 keep_alive() {
   local server_entry="$1"
   
@@ -115,13 +115,13 @@ keep_alive() {
   if [ $result -eq 124 ]; then
     recho "${RED}错误：$user@$server 连接超时${NC}" "${RED}Error: $user@$server connection timed out${NC}"
     # 这里可以添加发送通知的代码 | Code to send notifications can be added here
-    # message="Serv00 保活 SSH 连接超时！" | message="Serv00 alive SSH connection timed out!"
+    # message="Serv00 保号 SSH 连接超时！" | message="Serv00 alive SSH connection timed out!"
   elif [ $result -ne 0 ]; then
     recho "${RED}错误：$user@$server 连接失败${NC}" "${RED}Error: $user@$server connection failed${NC}"
-    # message="Serv00 保活 SSH 连接失败！" | message="Serv00 alive SSH connection failed!"
+    # message="Serv00 保号 SSH 连接失败！" | message="Serv00 alive SSH connection failed!"
   else
     recho "${GREEN}$user@$server 连接成功！${NC}" "${GREEN}$user@$server connection successful!${NC}"
-    # message="Serv00 保活 SSH 连接成功！" | message="Serv00 alive SSH connection successful!"
+    # message="Serv00 保号 SSH 连接成功！" | message="Serv00 alive SSH connection successful!"
   fi
   
   echo "----------------------------------------"
@@ -138,7 +138,7 @@ main() {
   # 读取服务器列表 | Read server list
   read_servers "$SERVERS_FILE"
   
-  # 对每个服务器执行保活操作 | Perform keep alive operation on each server
+  # 对每个服务器执行保号操作 | Perform keep alive operation on each server
   for server in "${servers[@]}"; do
     # 跳过空行和注释行 | Skip empty lines and comment lines
     if [[ -n "$server" ]] && [[ ! "$server" =~ ^[[:space:]]*# ]]; then

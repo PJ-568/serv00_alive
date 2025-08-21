@@ -1,0 +1,24 @@
+name: 测试与验证
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 运行测试
+        run: |
+          bash -n serv00_alive
+          bash -n serv00_alive_runner
+          bash -n scripts/is-newer-version.bash
+          bash -n scripts/test.bash
+          bash scripts/test.bash
